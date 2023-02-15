@@ -2,6 +2,7 @@ import styleText from "data-text:../app.css";
 import type { PlasmoGetStyle } from "plasmo";
 import { screen } from '@testing-library/react';
 import { within } from "@testing-library/dom";
+import { sendToBackground } from "@plasmohq/messaging";
 
 
 export const getStyle: PlasmoGetStyle = () => {
@@ -13,7 +14,7 @@ export const getStyle: PlasmoGetStyle = () => {
 import type { PlasmoCSConfig } from "plasmo"
 
 export const config: PlasmoCSConfig = {
-  matches: ["https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/shipmentinfo"]
+  matches: ["https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/shipmentinfo", "https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/rates"]
 }
 
 // const handleClick = () => {
@@ -99,9 +100,6 @@ export const config: PlasmoCSConfig = {
 
 const handleClick = () => {
   if (window.location.href === "https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/shipmentinfo") {
-
-
-
     console.log('React Testing Library');
 
     const getPickupLocation = () => {
@@ -121,7 +119,14 @@ const handleClick = () => {
     }
 
     const getPickupAdditionalServices = () => {
-      return null;
+      let ret = [];
+      const pickup_additional_services_elems = document.querySelectorAll('[multiselectcontrolname]')[0].childNodes[0].childNodes[1].childNodes[0].childNodes[1].childNodes[0].childNodes;
+      for (const elem of pickup_additional_services_elems) {
+        if (elem.nodeName === "DIV") {
+          ret.push(elem.childNodes[0].innerHTML);
+        }
+      }
+      return ret;
     }
 
 
@@ -134,7 +139,14 @@ const handleClick = () => {
     }
 
     const delivery_additional_services = () => {
-      return null;
+      let ret = [];
+      const delivery_additional_services_elems = document.querySelectorAll('[multiselectcontrolname]')[1].childNodes[0].childNodes[1].childNodes[0].childNodes[1].childNodes[0].childNodes;
+      for (const elem of delivery_additional_services_elems) {
+        if (elem.nodeName === "DIV") {
+          ret.push(elem.childNodes[0].innerHTML);
+        }
+      }
+      return ret;
     }
 
     const getHandlingUnit = () => {
@@ -211,13 +223,24 @@ const handleClick = () => {
     // save the data to localStorage
     localStorage.setItem('data', JSON.stringify(data));
   } else if (window.location.href === "https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/rates") {
-    console.log(localStorage.getItem('data'));
+
+    const data = localStorage.getItem('data');
+    sendToBackground({
+      name: "ping",
+      body: {
+        'data': data
+      }
+    }).then((res) => {
+      console.log(JSON.stringify(res, null, 2));
+    })
+
+    // console.log(resp);
   }
 };
 
 const CustomButton = () => {
   return (
-    <button onClick={handleClick} class="bg-transparent hover:bg-blue-500 text-blue-700 font-semibold hover:text-white py-2 px-4 border border-blue-500 hover:border-transparent none">This is a button</button>
+    <button onClick={handleClick} class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">Button</button>
   );
 }
 

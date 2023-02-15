@@ -6,13 +6,15 @@
   "author": "Ninad",
   "packageManager": "npm@8.19.3",
   "scripts": {
-    "dev": "plasmo dev",
+    "dev": "plasmo dev --verbose",
     "build": "plasmo build",
     "package": "plasmo package"
   },
   "dependencies": {
+    "@plasmohq/messaging": "^0.1.1",
     "@testing-library/dom": "^8.20.0",
-    "plasmo": "0.64.5",
+    "moment": "^2.29.4",
+    "plasmo": "0.65.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"
   },
@@ -31,7 +33,7 @@
   },
   "manifest": {
     "host_permissions": [
-      "https://*/*"
+      "*://api.firstshipper.com/*"
     ]
   }
 }
