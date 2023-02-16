@@ -101,129 +101,7 @@ export const config: PlasmoCSConfig = {
 const handleClick = () => {
   if (window.location.href === "https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/shipmentinfo") {
     console.log('React Testing Library');
-
-    const getPickupLocation = () => {
-      const region = screen.getByRole('region', {
-        name: /pickup/i
-      });
-
-      return within(region).getByRole('searchbox').value;
-    }
-
-    const getPickupDate = () => {
-      const region = screen.getByRole('region', {
-        name: /pickup/i
-      });
-
-      return within(region).getByRole('textbox').value;
-    }
-
-    const getPickupAdditionalServices = () => {
-      let ret = [];
-      const pickup_additional_services_elems = document.querySelectorAll('[multiselectcontrolname]')[0].childNodes[0].childNodes[1].childNodes[0].childNodes[1].childNodes[0].childNodes;
-      for (const elem of pickup_additional_services_elems) {
-        if (elem.nodeName === "DIV") {
-          ret.push(elem.childNodes[0].innerHTML);
-        }
-      }
-      return ret;
-    }
-
-
-    const getDeliveryLocation = () => {
-      const region = screen.getByRole('region', {
-        name: /delivery/i
-      });
-
-      return within(region).getByRole('searchbox').value;
-    }
-
-    const delivery_additional_services = () => {
-      let ret = [];
-      const delivery_additional_services_elems = document.querySelectorAll('[multiselectcontrolname]')[1].childNodes[0].childNodes[1].childNodes[0].childNodes[1].childNodes[0].childNodes;
-      for (const elem of delivery_additional_services_elems) {
-        if (elem.nodeName === "DIV") {
-          ret.push(elem.childNodes[0].innerHTML);
-        }
-      }
-      return ret;
-    }
-
-    const getHandlingUnit = () => {
-      return screen.getByText(/handling unit/i).parentElement.querySelector('input').value;
-    }
-
-    const getHandlingUnitType = () => {
-      return screen.getByText(/pallets/i).innerText;
-    }
-
-    const getWeight = () => {
-      return screen.getByText(/total weight \(lbs\)/i).parentElement.querySelector('input').value;
-    }
-
-    const getFreightClass = () => {
-      const label = screen.getByText(/Freight Class$/, {
-        exact: true,
-      });
-
-      return label.parentElement.childNodes[1].childNodes[0].childNodes[1].innerText;
-    }
-
-
-    const getLength = () => {
-      return screen.getByText(/length \(in\)/i).parentElement.querySelector('input').value;
-    }
-
-    const getWidth = () => {
-      return screen.getByText(/width \(in\)/i).parentElement.querySelector('input').value;
-    }
-
-    const getHeight = () => {
-      return screen.getByText(/height \(in\)/i).parentElement.querySelector('input').value;
-    }
-
-    const getIsStackableChecked = () => {
-      return screen.getByText(/stackable/i).parentElement.childNodes[0].getAttribute('class').includes('p-checkbox-checked');
-    }
-
-    const getIsExtremeLengthChecked = () => {
-      return screen.getByText(/extreme length/i).parentElement.childNodes[0].getAttribute('class').includes('p-checkbox-checked');
-    }
-
-    const getIsHazmatChecked = () => {
-      return screen.getByText(/hazmat/i).parentElement.childNodes[0].getAttribute('class').includes('p-checkbox-checked');
-    }
-
-    const data = {
-      "pickup_location": getPickupLocation(),
-      "pickup_date": getPickupDate(),
-      "pickup_additional_services": getPickupAdditionalServices(),
-
-      "delivery_location": getDeliveryLocation(),
-      "delivery_additional_services": delivery_additional_services(),
-
-      "items": [
-        {
-          "handling_type": getHandlingUnit(),
-          "handling_unit_type": getHandlingUnitType(),
-          "weight": getWeight(),
-          "freight_class": getFreightClass(),
-          "length": getLength(),
-          "width": getWidth(),
-          "height": getHeight(),
-          "is_stackable_checked": getIsStackableChecked(),
-          "is_extreme_length_checked": getIsExtremeLengthChecked(),
-          "is_hazmat_checked": getIsHazmatChecked()
-        }
-      ]
-    };
-
-    console.log(JSON.stringify(data, null, 2));
-
-    // save the data to localStorage
-    localStorage.setItem('data', JSON.stringify(data));
   } else if (window.location.href === "https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/rates") {
-
     const data = localStorage.getItem('data');
     sendToBackground({
       name: "ping",
@@ -238,10 +116,164 @@ const handleClick = () => {
   }
 };
 
-const CustomButton = () => {
-  return (
-    <button onClick={handleClick} class="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 border-b-4 border-blue-700 hover:border-blue-500 rounded">Button</button>
-  );
+
+const saveData = () => {
+
+  const getPickupLocation = () => {
+    const region = screen.getByRole('region', {
+      name: /pickup/i
+    });
+
+    return within(region).getByRole('searchbox').value;
+  }
+
+  const getPickupDate = () => {
+    const region = screen.getByRole('region', {
+      name: /pickup/i
+    });
+
+    return within(region).getByRole('textbox').value;
+  }
+
+  const getPickupAdditionalServices = () => {
+    let ret = [];
+    const pickup_additional_services_elems = document.querySelectorAll('[multiselectcontrolname]')[0].childNodes[0].childNodes[1].childNodes[0].childNodes[1].childNodes[0].childNodes;
+    for (const elem of pickup_additional_services_elems) {
+      if (elem.nodeName === "DIV") {
+        ret.push(elem.childNodes[0].innerHTML);
+      }
+    }
+    return ret;
+  }
+
+
+  const getDeliveryLocation = () => {
+    const region = screen.getByRole('region', {
+      name: /delivery/i
+    });
+
+    return within(region).getByRole('searchbox').value;
+  }
+
+  const delivery_additional_services = () => {
+    let ret = [];
+    const delivery_additional_services_elems = document.querySelectorAll('[multiselectcontrolname]')[1].childNodes[0].childNodes[1].childNodes[0].childNodes[1].childNodes[0].childNodes;
+    for (const elem of delivery_additional_services_elems) {
+      if (elem.nodeName === "DIV") {
+        ret.push(elem.childNodes[0].innerHTML);
+      }
+    }
+    return ret;
+  }
+
+  const getHandlingUnit = () => {
+    return screen.getByText(/handling unit/i).parentElement.querySelector('input').value;
+  }
+
+  const getHandlingUnitType = () => {
+    return screen.getByText(/pallets/i).innerText;
+  }
+
+  const getWeight = () => {
+    return screen.getByText(/total weight \(lbs\)/i).parentElement.querySelector('input').value;
+  }
+
+  const getFreightClass = () => {
+    const label = screen.getByText(/Freight Class$/, {
+      exact: true,
+    });
+
+    return label.parentElement.childNodes[1].childNodes[0].childNodes[1].innerText;
+  }
+
+
+  const getLength = () => {
+    return screen.getByText(/length \(in\)/i).parentElement.querySelector('input').value;
+  }
+
+  const getWidth = () => {
+    return screen.getByText(/width \(in\)/i).parentElement.querySelector('input').value;
+  }
+
+  const getHeight = () => {
+    return screen.getByText(/height \(in\)/i).parentElement.querySelector('input').value;
+  }
+
+  const getIsStackableChecked = () => {
+    return screen.getByText(/stackable/i).parentElement.childNodes[0].getAttribute('class').includes('p-checkbox-checked');
+  }
+
+  const getIsExtremeLengthChecked = () => {
+    return screen.getByText(/extreme length/i).parentElement.childNodes[0].getAttribute('class').includes('p-checkbox-checked');
+  }
+
+  const getIsHazmatChecked = () => {
+    return screen.getByText(/hazmat/i).parentElement.childNodes[0].getAttribute('class').includes('p-checkbox-checked');
+  }
+
+  const data = {
+    "pickup_location": getPickupLocation(),
+    "pickup_date": getPickupDate(),
+    "pickup_additional_services": getPickupAdditionalServices(),
+
+    "delivery_location": getDeliveryLocation(),
+    "delivery_additional_services": delivery_additional_services(),
+
+    "items": [
+      {
+        "handling_type": getHandlingUnit(),
+        "handling_unit_type": getHandlingUnitType(),
+        "weight": getWeight(),
+        "freight_class": getFreightClass(),
+        "length": getLength(),
+        "width": getWidth(),
+        "height": getHeight(),
+        "is_stackable_checked": getIsStackableChecked(),
+        "is_extreme_length_checked": getIsExtremeLengthChecked(),
+        "is_hazmat_checked": getIsHazmatChecked()
+      }
+    ]
+  };
+
+  console.log(JSON.stringify(data, null, 2));
+
+  // save the data to localStorage
+  localStorage.setItem('data', JSON.stringify(data));
 }
 
-export default CustomButton
+
+document.addEventListener('click', (event) => {
+  if (event.target.nodeName === "BUTTON" &&
+    event.target.innerText === "Get Rates") {
+    console.log('Wyatt Earp: We need the button was clicked');
+
+    const data = localStorage.getItem('data');
+
+    sendToBackground({
+      name: "ping",
+      body: {
+        'data': data
+      }
+    }).then((res) => {
+      console.log(JSON.stringify(res, null, 2));
+    })
+  }
+});
+
+
+document.addEventListener('mouseover', (event) => {
+  if (window.location.href === "https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/shipmentinfo" &&
+    event.target.nodeName === "BUTTON" &&
+    event.target.innerText === "Get Rates") {
+    saveData();
+    // console.log('We need the button was clicked');
+  }
+});
+
+const CustomButton = () => {
+  return (
+    <button>DEBUG</button>
+  )
+}
+
+export default CustomButton;

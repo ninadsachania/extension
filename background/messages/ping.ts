@@ -1,30 +1,24 @@
-import type { PlasmoMessaging } from "@plasmohq/messaging"
+import type { PlasmoMessaging } from "@plasmohq/messaging";
+import moment from 'moment';
+
 
 
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
-    console.log('Hello, World');
-    console.log(req.body.data);
-
-    const json_data = JSON.parse(req.body.data);
-    console.log(json_data);
-
+    const data = JSON.parse(req.body.data);
+    console.log(data);
+    console.log(moment(data['pickup_date'], 'MM/DD/YYYY', true));
 
     const url = `https://api.firstshipper.com/quote`;
-    fetch(url, {
-        'method': 'POST',
-        'headers': {
-            'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2xsZWN0aW9uSWQiOiJyeWU1em9zZnh1aGMxbWoiLCJleHAiOjE2Nzc1NjE2MDEsImlkIjoiZm92aW5kamNlYjQ3anQ2IiwidHlwZSI6ImF1dGhSZWNvcmQifQ.cCSZK10iDgxUgkrFs6YIojdLkWVXJwd1VqpDraflvgM',
-            'Content-Type': 'application/json'
-        },
-        'body': `{
+
+    const body = `{
         "quoteId": "",
         "requesterId": "",
         "mode": "",
         "liablePartyId": "",
-        "pickupDate": "2023-03-22T22:00:00.00z",
+        "pickupDate": "${moment(data['pickup_date'], 'MM/DD/YYYY', true).format("YYYY-MM-DDTHH:MM:ss.SS") + 'z'}",
         "displayDate": "2023-03-22",
         "deliveryDate": "2023-05-13T22:00:00.00z",
-        "totalItems": null,
+        "totalItems": ${data['items'].length},
         "totalWeight": null,
         "validUntil": "",
         "editMode": true,
@@ -33,10 +27,10 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
         "commodities": [
             {
                 "density": null,
-                "length": 48,
-                "width": 48,
-                "height": 75,
-                "weight": 1000,
+                "length": ${parseInt(data['items'][0]['length'])},
+                "width": ${parseInt(data['items'][0]['width'])},
+                "height": ${parseInt(data['items'][0]['height'])},
+                "weight": ${parseInt(data['items'][0]['weight'])},
                 "dimensionDisplay": "",
                 "packageType": 1,
                 "quantity": 1,
@@ -57,7 +51,7 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
                     "sortAndSegregate": false,
                     "guaranteed": false,
                     "hazardous": false,
-                    "stackable": false
+                    "stackable": ${data['items'][0]['is_stackable_checked']}
                 }
             }
         ],
@@ -201,9 +195,19 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
                 "businessId": "asuanku@gmail.com"
             }
         }
-    }`
-    })
-        .then((resp) => resp.json())
+    }`;
+
+    console.log(body);
+
+
+    fetch(url, {
+        'method': 'POST',
+        'headers': {
+            'Authorization': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb2xsZWN0aW9uSWQiOiJyeWU1em9zZnh1aGMxbWoiLCJleHAiOjE2Nzc1NjE2MDEsImlkIjoiZm92aW5kamNlYjQ3anQ2IiwidHlwZSI6ImF1dGhSZWNvcmQifQ.cCSZK10iDgxUgkrFs6YIojdLkWVXJwd1VqpDraflvgM',
+            'Content-Type': 'application/json'
+        },
+        'body': body
+    }).then((resp) => resp.json())
         .then((data) => {
             console.log(data);
             res.send({
@@ -212,4 +216,4 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
         });
 }
 
-export default handler
+export default handler;
