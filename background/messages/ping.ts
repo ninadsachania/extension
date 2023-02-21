@@ -199,7 +199,7 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
 
     console.log(body);
 
-
+try {
     fetch(url, {
         'method': 'POST',
         'headers': {
@@ -214,6 +214,9 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
                 body: data
             })
         });
+    }catch(e) {
+        console.log("error while fetching data from service worker",e);
+    }
 }
 
 export default handler;

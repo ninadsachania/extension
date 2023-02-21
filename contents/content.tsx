@@ -2,8 +2,9 @@ import styleText from "data-text:../app.css";
 import type { PlasmoGetStyle } from "plasmo";
 import { screen } from '@testing-library/react';
 import { within } from "@testing-library/dom";
+import React from "react";
+import { useState,useEffect, useCallback } from "react";
 import { sendToBackground } from "@plasmohq/messaging";
-// import { Sidebar } from "./Sidebar.js";
 
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
@@ -14,7 +15,8 @@ export const getStyle: PlasmoGetStyle = () => {
 import type { PlasmoCSConfig } from "plasmo";
 
 export const config: PlasmoCSConfig = {
-  matches: ["https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/shipmentinfo", "https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/rates"]
+  matches: ["https://scm.jbhunt.com/shipper/ngx/create-shipment/*"],
+  all_frames: true
 }
 
 
@@ -98,7 +100,17 @@ export const config: PlasmoCSConfig = {
 // };
 
 // let temp;
+export const getRootContainer = () => {
+  var elemDiv = document.createElement("div")
+  elemDiv.setAttribute("id", "EXTENSION_ROOT")
+  document.body.appendChild(elemDiv)
+  return document.getElementById("EXTENSION_ROOT")
+}
 
+const Example = (props) => {
+  const  [isData, setIsData] = useState(false);
+  const [data, setData] = useState(localStorage.getItem("finalData"));
+  
 const handleClick = () => {
   if (window.location.href === "https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/shipmentinfo") {
     console.log('React Testing Library');
@@ -112,12 +124,18 @@ const handleClick = () => {
       }
     }).then((res) => {
       console.log(JSON.stringify(res, null, 2));
+    }).catch((e)=>{
+      console.error("while sendToBackground ", e);
     })
 
     // console.log(resp);
   }
 };
 
+
+
+
+let dataItems = [];
 
 const saveData = () => {
 
@@ -213,14 +231,14 @@ const saveData = () => {
     return screen.getByText(/hazmat/i).parentElement.childNodes[0].getAttribute('class').includes('p-checkbox-checked');
   }
 
-  const data = {
+  const tempData = {
     "pickup_location": getPickupLocation(),
     "pickup_date": getPickupDate(),
     "pickup_additional_services": getPickupAdditionalServices(),
-
+  
     "delivery_location": getDeliveryLocation(),
     "delivery_additional_services": delivery_additional_services(),
-
+  
     "items": [
       {
         "handling_type": getHandlingUnit(),
@@ -235,17 +253,20 @@ const saveData = () => {
         "is_hazmat_checked": getIsHazmatChecked()
       }
     ]
-  };
-
-  console.log(JSON.stringify(data, null, 2));
+  }
+  console.log(tempData);
+  
+  console.log(JSON.stringify(tempData, null, 2));
 
   // save the data to localStorage
-  localStorage.setItem('data', JSON.stringify(data));
+  localStorage.setItem('data', JSON.stringify(tempData));
+
+  
+
+  // setData(tempData);
+  // setIsData(true);
 }
-
-let dataItems = [];
-
-document.addEventListener('click', (event) => {
+const serviceWorkerRequest =  useCallback((event) => {
   console.log(event.target);
   console.log(window.location.href);
   if ((event.target.nodeName === "SPAN" && event.target.innerText === "Get Rates") ||
@@ -263,69 +284,110 @@ document.addEventListener('click', (event) => {
       }
     }).then((res) => {
       dataItems = res['body']['bids'];
-      console.log(dataItems);
+      setData(dataItems);
+      console.log(data);
+      localStorage.setItem("finalData",JSON.stringify(dataItems));
+      console.log("this is our data", data);
       // console.log(JSON.stringify(res, null, 2));
-    });
+    }).catch((e)=>{
+      console.log("while fetching data",e )
+    })
   }
-});
+},[]);
+const saveDataToLocal = useCallback((event) => {
+  // console.log("rerender");
 
-
-document.addEventListener('mouseover', (event) => {
   if (window.location.href === "https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/shipmentinfo" &&
     event.target.nodeName === "BUTTON" &&
     event.target.innerText === "Get Rates") {
+      console.log("hello whatever");
     saveData();
+    console.log("done")
   }
-});
+},[])
 
-const Example = (props) => {
-  return (
-    <div className="relative z-10" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
-  {/* <!-- Background backdrop, show/hide based on slide-over state. --> */}
-  <div class="fixed inset-0"></div>
 
-  <div class="fixed inset-0 overflow-hidden">
-    <div class="absolute inset-0 overflow-hidden">
-      <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
-        {/* <!--
-          Slide-over panel, show/hide based on slide-over state.
+useEffect(()=>{
+  console.log(document);
 
-          Entering: "transform transition ease-in-out duration-500 sm:duration-700"
-            From: "translate-x-full"
-            To: "translate-x-0"
-          Leaving: "transform transition ease-in-out duration-500 sm:duration-700"
-            From: "translate-x-0"
-            To: "translate-x-full"
-        --> */}
-        <div class="pointer-events-auto w-screen max-w-md">
-          <div class="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-xl">
-            <div class="px-4 sm:px-6">
-              <div class="flex items-start justify-between">
-                <h2 class="text-lg font-medium text-gray-900" id="slide-over-title">Panel title</h2>
-                <div class="ml-3 flex h-7 items-center">
-                  <button type="button" class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                    <span class="sr-only">Close panel</span>
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div class="relative mt-6 flex-1 px-4 sm:px-6">
-              {/* <!-- Replace with your content --> */}
-              <div class="absolute inset-0 px-4 sm:px-6">
-                <div class="h-full border-2 border-dashed border-gray-200" aria-hidden="true"></div>
-              </div>
-              {/* <!-- /End replace --> */}
-            </div>
-          </div>
-        </div>
+  console.log("final data rerender",data);
+  document.addEventListener('mouseover', saveDataToLocal);
+  document.addEventListener('click', serviceWorkerRequest);
+  return () =>{
+    document.removeEventListener('mouseover',saveDataToLocal);
+    document.removeEventListener('click',serviceWorkerRequest);
+  }
+
+},[saveDataToLocal,serviceWorkerRequest,data]);
+
+  if(!data) {
+    console.log("theres no data");
+    return (
+      <div
+        style={{width:"30vw",height:"100vh", backgroundColor:"red",color:"white",fontSize:"25px",zIndex:1000, display:"flex", flexDirection:"column", alignItems:"center",justifyContent:"center"}}
+      >
+       data not found
       </div>
-    </div>
-  </div>
-</div>
-  );
+    )
+  }
+
+  return (
+      <div
+        style={{width:"30vw",height:"100vh", backgroundColor:"red",color:"white",fontSize:"25px",zIndex:1000}}
+      >
+        {JSON.parse(data)?.map((item, idx)=>{
+          return <div key={idx}>{item?.carrier}</div>
+        })}
+      </div>
+    )
+    //{/* </div> */
+
+//     <div className="relative z-10" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+//   {/* <!-- Background backdrop, show/hide based on slide-over state. --> */}
+//   <div class="fixed inset-0"></div>
+
+//   <div class="fixed inset-0 overflow-hidden">
+//     <div class="absolute inset-0 overflow-hidden">
+//       <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+//         {/* <!--
+//           Slide-over panel, show/hide based on slide-over state.
+
+//           Entering: "transform transition ease-in-out duration-500 sm:duration-700"
+//             From: "translate-x-full"
+//             To: "translate-x-0"
+//           Leaving: "transform transition ease-in-out duration-500 sm:duration-700"
+//             From: "translate-x-0"
+//             To: "translate-x-full"
+//         --> */}
+//         <div class="pointer-events-auto w-screen max-w-md">
+//           <div class="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-xl">
+//             <div class="px-4 sm:px-6">
+//               <div class="flex items-start justify-between">
+//                 <h2 class="text-lg font-medium text-gray-900" id="slide-over-title">Panel title</h2>
+//                 <div class="ml-3 flex h-7 items-center">
+//                   <button type="button" class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+//                     <span class="sr-only">Close panel</span>
+//                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+//                       <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+//                     </svg>
+//                   </button>
+//                 </div>
+//               </div>
+//             </div>
+//             <div class="relative mt-6 flex-1 px-4 sm:px-6">
+//               {/* <!-- Replace with your content --> */}
+//               <div class="absolute inset-0 px-4 sm:px-6">
+//                 <div class="h-full border-2 border-dashed border-gray-200" aria-hidden="true"></div>
+//               </div>
+//               {/* <!-- /End replace --> */}
+//             </div>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   </div>
+// </div>
+  
 }
 
 export default Example;
