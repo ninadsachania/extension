@@ -3,7 +3,7 @@ import type { PlasmoGetStyle } from "plasmo";
 import { screen } from '@testing-library/react';
 import { within } from "@testing-library/dom";
 import { sendToBackground } from "@plasmohq/messaging";
-
+// import { Sidebar } from "./Sidebar.js";
 
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
@@ -16,6 +16,7 @@ import type { PlasmoCSConfig } from "plasmo";
 export const config: PlasmoCSConfig = {
   matches: ["https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/shipmentinfo", "https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/rates"]
 }
+
 
 // const handleClick = () => {
 //   if (window.location.href === "https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/rates") {
@@ -103,6 +104,7 @@ const handleClick = () => {
     console.log('React Testing Library');
   } else if (window.location.href === "https://scm.jbhunt.com/shipper/ngx/create-shipment/ltl/rates") {
     const data = localStorage.getItem('data');
+
     sendToBackground({
       name: "ping",
       body: {
@@ -241,12 +243,17 @@ const saveData = () => {
   localStorage.setItem('data', JSON.stringify(data));
 }
 
+let dataItems = [];
 
 document.addEventListener('click', (event) => {
-  if (event.target.nodeName === "BUTTON" &&
-    event.target.innerText === "Get Rates") {
+  console.log(event.target);
+  console.log(window.location.href);
+  if ((event.target.nodeName === "SPAN" && event.target.innerText === "Get Rates") ||
+    (event.target.nodeName === "DIV" && event.target.getAttribute('class').includes('buttons-container')) || 
+    (event.target.nodeName === "BUTTON" && event.target.getAttribute('class').includes('continue-button')) ||
+    (event.target.nodeName === "P-BUTTON" && event.target.getAttribute('styleClass').includes('continue-button'))) {
     console.log('Wyatt Earp: We need the button was clicked');
-
+    console.log('Did we get here?');
     const data = localStorage.getItem('data');
 
     sendToBackground({
@@ -255,8 +262,10 @@ document.addEventListener('click', (event) => {
         'data': data
       }
     }).then((res) => {
-      console.log(JSON.stringify(res, null, 2));
-    })
+      dataItems = res['body']['bids'];
+      console.log(dataItems);
+      // console.log(JSON.stringify(res, null, 2));
+    });
   }
 });
 
@@ -266,44 +275,56 @@ document.addEventListener('mouseover', (event) => {
     event.target.nodeName === "BUTTON" &&
     event.target.innerText === "Get Rates") {
     saveData();
-    // console.log('We need the button was clicked');
   }
 });
 
-const Example = () => {
+const Example = (props) => {
   return (
-    <div class="relative z-10" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">s
-      <div class="fixed inset-0"></div>
+    <div className="relative z-10" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
+  {/* <!-- Background backdrop, show/hide based on slide-over state. --> */}
+  <div class="fixed inset-0"></div>
 
-      <div class="fixed inset-0 overflow-hidden">
-        <div class="absolute inset-0 overflow-hidden">
-          <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
-            <div class="pointer-events-auto w-screen max-w-md">
-              <div class="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-xl">
-                <div class="px-4 sm:px-6">
-                  <div class="flex items-start justify-between">
-                    <h2 class="text-lg font-medium text-gray-900" id="slide-over-title">Panel title</h2>
-                    <div class="ml-3 flex h-7 items-center">
-                      <button type="button" class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                        <span class="sr-only">Close panel</span>
-                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-                <div class="relative mt-6 flex-1 px-4 sm:px-6">
-                  <div class="absolute inset-0 px-4 sm:px-6">
-                    <div class="h-full border-2 border-dashed border-gray-200" aria-hidden="true"></div>
-                  </div>
+  <div class="fixed inset-0 overflow-hidden">
+    <div class="absolute inset-0 overflow-hidden">
+      <div class="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+        {/* <!--
+          Slide-over panel, show/hide based on slide-over state.
+
+          Entering: "transform transition ease-in-out duration-500 sm:duration-700"
+            From: "translate-x-full"
+            To: "translate-x-0"
+          Leaving: "transform transition ease-in-out duration-500 sm:duration-700"
+            From: "translate-x-0"
+            To: "translate-x-full"
+        --> */}
+        <div class="pointer-events-auto w-screen max-w-md">
+          <div class="flex h-full flex-col overflow-y-scroll bg-white py-6 shadow-xl">
+            <div class="px-4 sm:px-6">
+              <div class="flex items-start justify-between">
+                <h2 class="text-lg font-medium text-gray-900" id="slide-over-title">Panel title</h2>
+                <div class="ml-3 flex h-7 items-center">
+                  <button type="button" class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                    <span class="sr-only">Close panel</span>
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
                 </div>
               </div>
+            </div>
+            <div class="relative mt-6 flex-1 px-4 sm:px-6">
+              {/* <!-- Replace with your content --> */}
+              <div class="absolute inset-0 px-4 sm:px-6">
+                <div class="h-full border-2 border-dashed border-gray-200" aria-hidden="true"></div>
+              </div>
+              {/* <!-- /End replace --> */}
             </div>
           </div>
         </div>
       </div>
     </div>
+  </div>
+</div>
   );
 }
 
